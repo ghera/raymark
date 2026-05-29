@@ -31,9 +31,8 @@
 #endif
 
 #define FPS_STATS_WARMUP_SECONDS 3.0
-#define FPS_STATS_INITIAL_CAPACITY 1024
-#define FPS_STATS_MIN_SAMPLES 30
-#define FPS_STATS_TRIM_RATIO 0.05
+#define FPS_STATS_WINDOW_SIZE 1000
+#define FPS_STATS_MIN_SAMPLES 100
 #define FPS_STATS_UPDATE_INTERVAL 0.25
 
 typedef struct RenderInfo {
@@ -45,17 +44,17 @@ typedef struct RenderInfo {
 
 typedef struct FpsStatsResult {
     bool ready;
-    double min;
-    double max;
     double avg;
+    double low1pct;
+    double low01pct;
 } FpsStatsResult;
 
 typedef struct FpsStats {
     double elapsed_time;
     double refresh_time;
     unsigned int sample_count;
-    unsigned int sample_capacity;
-    float* frame_times;
+    unsigned int write_idx;
+    float frame_times[FPS_STATS_WINDOW_SIZE];
     FpsStatsResult cached_result;
 } FpsStats;
 
@@ -125,58 +124,58 @@ static int CompareFrameTimes(const void* a, const void* b) {
     return (left > right) - (left < right);
 }
 
-static bool ReserveFpsStatsSamples(FpsStats* stats, unsigned int requiredCapacity) {
-    if (requiredCapacity <= stats->sample_capacity) {
-        return true;
-    }
-
-    unsigned int newCapacity = stats->sample_capacity > 0 ? stats->sample_capacity * 2 : FPS_STATS_INITIAL_CAPACITY;
-
-    while (newCapacity < requiredCapacity) {
-        newCapacity *= 2;
-    }
-
-    float* newFrameTimes = realloc(stats->frame_times, newCapacity * sizeof(stats->frame_times[0]));
-
-    if (newFrameTimes == NULL) {
-        return false;
-    }
-
-    stats->frame_times = newFrameTimes;
-    stats->sample_capacity = newCapacity;
-    return true;
-}
-
 static FpsStatsResult CalculateFpsStatsResult(FpsStats* stats) {
     FpsStatsResult result = {0};
+    unsigned int n = stats->sample_count;
 
-    if (stats->sample_count < FPS_STATS_MIN_SAMPLES) {
+    if (n < FPS_STATS_MIN_SAMPLES) {
         return result;
     }
 
-    qsort(stats->frame_times, stats->sample_count, sizeof(stats->frame_times[0]), CompareFrameTimes);
-
-    unsigned int trim = (unsigned int)((double)stats->sample_count * FPS_STATS_TRIM_RATIO);
-
-    if (trim * 2 >= stats->sample_count) {
-        trim = 0;
+    if (n > FPS_STATS_WINDOW_SIZE) {
+        n = FPS_STATS_WINDOW_SIZE;
     }
 
-    const unsigned int start = trim;
-    const unsigned int end = stats->sample_count - trim;
-    double totalTime = 0.0;
+    // Ring buffer: oldest sample is at write_idx when full, at 0 when not yet full
+    unsigned int start = (n >= FPS_STATS_WINDOW_SIZE) ? stats->write_idx : 0;
 
-    for (unsigned int i = start; i < end; i++) {
-        totalTime += stats->frame_times[i];
+    // Copy frame times into temp buffer for sorting
+    float sorted[FPS_STATS_WINDOW_SIZE];
+    for (unsigned int i = 0; i < n; i++) {
+        sorted[i] = stats->frame_times[(start + i) % FPS_STATS_WINDOW_SIZE];
     }
 
-    if (totalTime <= 0.0) {
-        return result;
+    qsort(sorted, n, sizeof(sorted[0]), CompareFrameTimes);
+
+    double total = 0.0;
+    for (unsigned int i = 0; i < n; i++) {
+        total += sorted[i];
     }
 
-    result.min = 1.0 / stats->frame_times[end - 1];
-    result.max = 1.0 / stats->frame_times[start];
-    result.avg = (double)(end - start) / totalTime;
+    result.avg = (double)n / total;
+
+    // 1% low: average of worst 1% frames (slowest at end after sort)
+    {
+        unsigned int count = n / 100;
+        if (count < 1) count = 1;
+        double sum = 0.0;
+        for (unsigned int i = 0; i < count; i++) {
+            sum += sorted[n - 1 - i];
+        }
+        result.low1pct = (double)count / sum;
+    }
+
+    // 0.1% low: average of worst 0.1% frames
+    {
+        unsigned int count = n / 1000;
+        if (count < 1) count = 1;
+        double sum = 0.0;
+        for (unsigned int i = 0; i < count; i++) {
+            sum += sorted[n - 1 - i];
+        }
+        result.low01pct = (double)count / sum;
+    }
+
     result.ready = true;
     return result;
 }
@@ -192,12 +191,13 @@ static void UpdateFpsStats(FpsStats* stats, float frameTime) {
         return;
     }
 
-    if (!ReserveFpsStatsSamples(stats, stats->sample_count + 1)) {
-        return;
+    stats->frame_times[stats->write_idx] = frameTime;
+    stats->write_idx = (stats->write_idx + 1) % FPS_STATS_WINDOW_SIZE;
+
+    if (stats->sample_count < FPS_STATS_WINDOW_SIZE) {
+        stats->sample_count++;
     }
 
-    stats->frame_times[stats->sample_count] = frameTime;
-    stats->sample_count++;
     stats->refresh_time += frameTime;
 
     if (!stats->cached_result.ready || stats->refresh_time >= FPS_STATS_UPDATE_INTERVAL) {
@@ -208,21 +208,23 @@ static void UpdateFpsStats(FpsStats* stats, float frameTime) {
 
 static void DrawFpsStats(const FpsStats* stats, int x, int y, float textScale) {
     const int fontSize = (int)(20.0f * textScale / 5.0f + 0.5f) * 5;
+    const int lineHeight = (int)(25.0f * textScale / 5.0f + 0.5f) * 5;
     const FpsStatsResult result = stats->cached_result;
 
     if (!result.ready) {
-        DrawText("FPS min: -- max: -- avg: --", x, y, fontSize, LIME);
+        DrawText("FPS avg: ---", x, y, fontSize, LIME);
+        DrawText("1% low: ---", x, y + lineHeight, fontSize, ORANGE);
+        DrawText("0.1% low: ---", x, y + lineHeight * 2, fontSize, RED);
         return;
     }
 
-    DrawText(TextFormat("FPS min: %.0f max: %.0f avg: %.0f", result.min, result.max, result.avg), x, y, fontSize, LIME);
+    DrawText(TextFormat("FPS avg: %.0f", result.avg), x, y, fontSize, LIME);
+    DrawText(TextFormat("1%% low: %.0f", result.low1pct), x, y + lineHeight, fontSize, ORANGE);
+    DrawText(TextFormat("0.1%% low: %.0f", result.low01pct), x, y + lineHeight * 2, fontSize, RED);
 }
 
 static void UnloadFpsStats(FpsStats* stats) {
-    free(stats->frame_times);
-    stats->frame_times = NULL;
     stats->sample_count = 0;
-    stats->sample_capacity = 0;
 }
 
 int main(void) {
@@ -289,7 +291,8 @@ int main(void) {
         DrawSpikeField(field, cam);
         DrawFpsStats(&fpsStats, safeX, safeY, textScale);
         UpdateRenderInfo(&renderInfo);
-        DrawRenderInfo(&renderInfo, safeX, safeY + (int)(30.0f * textScale), textScale);
+        int lineH = (int)(25.0f * textScale / 5.0f + 0.5f) * 5;
+        DrawRenderInfo(&renderInfo, safeX, safeY + lineH * 3 + (int)(10.0f * textScale), textScale);
         EndDrawing();
     }
 
