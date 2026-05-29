@@ -1,0 +1,79 @@
+# clangd
+.cache/
+**/.cache/
+
+# Desktop (VSCode, Premake)
+/desktop/bin
+/desktop/build
+/desktop/compile_commands.json
+Makefile
+
+# Android
+*.apk
+*.ap_
+*.dex
+*.class
+*.so
+*.jar
+!gradle-wrapper.jar
+*.aar
+*.keystore
+*.jks
+
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Local properties (machine-specific paths, e.g. SDK)
+local.properties
+
+# NDK
+.cxx/
+**/.cxx/
+obj/
+ndk-build/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake-build-*/
+CMakeSettings.json
+Makefile
+install_manifest.txt
+Testing/
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Mac/Linux artifacts
+.DS_Store
+*.swp
+*.swo
+
+# Windows artifacts
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Xcode
+xcuserdata/
+/ios/compile_commands.json
+/ios/build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/README.md
+fastlane/screenshots/
+fastlane/test_output/
+
+# Agents
+.claude/
+.codex/
+
+# Python
+__pycache__/
+*.pyc

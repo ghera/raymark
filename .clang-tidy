@@ -1,0 +1,12 @@
+Checks: >
+  -*,
+  clang-analyzer-*,
+  bugprone-*,
+  -bugprone-narrowing-conversions,
+  performance-*
+WarningsAsErrors: ''
+HeaderFilterRegex: '^(desktop|ios|android/app/src/main/cpp)/'
+FormatStyle: none
+CheckOptions:
+  - key: bugprone-easily-swappable-parameters.MinimumLength
+    value: '4'

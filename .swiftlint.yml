@@ -1,0 +1,40 @@
+excluded:
+  - Carthage
+  - Pods
+  - build
+
+disabled_rules:
+  - opening_brace
+  - trailing_whitespace
+  - trailing_comma
+  - unused_setter_value
+  - switch_case_alignment
+  - void_function_in_ternary
+  - inclusive_language
+
+type_body_length:
+  warning: 300
+
+function_body_length:
+  warning: 60
+
+file_length:
+  warning: 600
+
+line_length:
+  warning: 200
+  ignores_function_declarations: true
+  ignores_comments: true
+  ignores_interpolated_strings: true
+  ignores_urls: true
+
+function_parameter_count:
+  warning: 8
+  error: 10
+
+identifier_name:
+  min_length: 2
+  excluded: [i, j, k, c, n, t, w, h, x, y, r, g, b, a]
+
+cyclomatic_complexity:
+  ignores_case_statements: true

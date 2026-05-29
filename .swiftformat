@@ -1,0 +1,16 @@
+--swiftversion 5.10
+
+# format options
+--indentcase true
+--ifdef no-indent
+--stripunusedargs closure-only
+--commas inline
+--trimwhitespace nonblank-lines
+--closingparen same-line
+--wrapternary before-operators
+
+# rules
+--disable enumNamespaces, wrapMultilineStatementBraces, preferKeyPath
+
+# file options
+--exclude Pods, build

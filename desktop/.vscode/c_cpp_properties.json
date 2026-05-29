@@ -1,0 +1,49 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/../raylib/src/**",
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/src/**"
+            ],
+            "defines": [
+                "DEBUG",
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "PLATFORM_DESKTOP",
+                "RAYGUI_SUPPORT_ICONS",
+                "RAYLIB_SUPPORT_STANDARD_FILEIO",
+                "RAYLIB_SUPPORT_LOG",
+                "GRAPHICS_API_OPENGL_33"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "macos-clang-arm64"
+        },
+        {
+            "name": "Windows",
+            "includePath": [
+                "${workspaceFolder}/../raylib/src/**",
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/src/**"
+            ],
+            "defines": [
+                "DEBUG",
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "PLATFORM_DESKTOP",
+                "RAYGUI_SUPPORT_ICONS",
+                "RAYLIB_SUPPORT_STANDARD_FILEIO",
+                "RAYLIB_SUPPORT_LOG",
+                "GRAPHICS_API_OPENGL_33"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-clang-x64"
+        }
+    ],
+    "version": 4
+}
