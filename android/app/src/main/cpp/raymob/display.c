@@ -72,3 +72,37 @@ Orientation GetScreenOrientation()
 
     return result;
 }
+
+typedef int (*SafeAreaGetter)(JNIEnv* env, jobject displayManager, jclass displayManagerClass);
+
+static int GetSafeAreaInset(const char* methodName)
+{
+    int result = 0;
+    jobject nativeLoaderInst = GetNativeLoaderInstance();
+
+    if (nativeLoaderInst != NULL) {
+        JNIEnv* env = AttachCurrentThread();
+
+        jclass nativeLoaderClass = (*env)->GetObjectClass(env, nativeLoaderInst);
+        jfieldID displayManagerField = (*env)->GetFieldID(env, nativeLoaderClass, "displayManager", "Lcom/raylib/raymob/DisplayManager;");
+        jobject displayManager = (*env)->GetObjectField(env, nativeLoaderInst, displayManagerField);
+
+        if (displayManager != NULL) {
+            jclass displayManagerClass = (*env)->GetObjectClass(env, displayManager);
+            jmethodID method = (*env)->GetMethodID(env, displayManagerClass, methodName, "()I");
+
+            if (method != NULL) {
+                result = (*env)->CallIntMethod(env, displayManager, method);
+            }
+        }
+
+        DetachCurrentThread();
+    }
+
+    return result;
+}
+
+int GetSafeAreaTop(void) { return GetSafeAreaInset("getSafeAreaTop"); }
+int GetSafeAreaBottom(void) { return GetSafeAreaInset("getSafeAreaBottom"); }
+int GetSafeAreaLeft(void) { return GetSafeAreaInset("getSafeAreaLeft"); }
+int GetSafeAreaRight(void) { return GetSafeAreaInset("getSafeAreaRight"); }

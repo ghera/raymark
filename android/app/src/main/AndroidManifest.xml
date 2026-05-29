@@ -33,6 +33,7 @@
         <activity
             android:name=".LaunchActivity"
             android:theme="@style/AppTheme"
+            android:screenOrientation="sensorLandscape"
             android:configChanges="keyboardHidden"
             android:launchMode="singleTask"
             android:clearTaskOnLaunch="true"
@@ -47,6 +48,7 @@
         <activity
             android:name=".NativeLoader"
             android:theme="@style/AppTheme.Game"
+            android:screenOrientation="sensorLandscape"
             android:configChanges="keyboardHidden|screenSize"
             android:launchMode="singleTask"
             android:clearTaskOnLaunch="true"

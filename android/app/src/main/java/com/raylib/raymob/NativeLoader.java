@@ -40,6 +40,9 @@ public class NativeLoader extends NativeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (BuildConfig.DISPLAY_ORIENTATION >= 0) {
+            setRequestedOrientation(BuildConfig.DISPLAY_ORIENTATION);
+        }
         displayManager = new DisplayManager(this);
         softKeyboard = new SoftKeyboard(this);
         reviewHelper = new ReviewHelper(this);

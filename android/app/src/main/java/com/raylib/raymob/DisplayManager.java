@@ -4,6 +4,7 @@ import android.os.Build;
 import android.view.Display;
 import android.app.NativeActivity;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager.LayoutParams;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -60,6 +61,54 @@ public class DisplayManager {
     public int getOrientation()
     {
         return display != null ? display.getRotation() : -1;
+    }
+
+    public int getSafeAreaTop()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsets insets = activity.getWindowManager().getCurrentWindowMetrics().getWindowInsets();
+            return insets.getDisplayCutout() != null ? insets.getDisplayCutout().getSafeInsetTop() : 0;
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            WindowInsets insets = activity.getWindow().getDecorView().getRootWindowInsets();
+            return insets.getDisplayCutout() != null ? insets.getDisplayCutout().getSafeInsetTop() : 0;
+        }
+        return 0;
+    }
+
+    public int getSafeAreaBottom()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsets insets = activity.getWindowManager().getCurrentWindowMetrics().getWindowInsets();
+            return insets.getDisplayCutout() != null ? insets.getDisplayCutout().getSafeInsetBottom() : 0;
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            WindowInsets insets = activity.getWindow().getDecorView().getRootWindowInsets();
+            return insets.getDisplayCutout() != null ? insets.getDisplayCutout().getSafeInsetBottom() : 0;
+        }
+        return 0;
+    }
+
+    public int getSafeAreaLeft()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsets insets = activity.getWindowManager().getCurrentWindowMetrics().getWindowInsets();
+            return insets.getDisplayCutout() != null ? insets.getDisplayCutout().getSafeInsetLeft() : 0;
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            WindowInsets insets = activity.getWindow().getDecorView().getRootWindowInsets();
+            return insets.getDisplayCutout() != null ? insets.getDisplayCutout().getSafeInsetLeft() : 0;
+        }
+        return 0;
+    }
+
+    public int getSafeAreaRight()
+    {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsets insets = activity.getWindowManager().getCurrentWindowMetrics().getWindowInsets();
+            return insets.getDisplayCutout() != null ? insets.getDisplayCutout().getSafeInsetRight() : 0;
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            WindowInsets insets = activity.getWindow().getDecorView().getRootWindowInsets();
+            return insets.getDisplayCutout() != null ? insets.getDisplayCutout().getSafeInsetRight() : 0;
+        }
+        return 0;
     }
 
     public void renderIntoCutoutArea() {

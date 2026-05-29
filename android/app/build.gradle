@@ -102,6 +102,7 @@ android {
         buildConfigField("boolean", "FEATURE_DISPLAY_KEEP_ON", project.properties['display.keep_on'] ?: "false")
         buildConfigField("boolean", "FEATURE_DISPLAY_IMMERSIVE", project.properties['display.immersive'] ?: "false")
         buildConfigField("boolean", "FEATURE_DISPLAY_INTO_CUTOUT", project.properties['display.into_cutout'] ?: "false")
+        buildConfigField("int", "DISPLAY_ORIENTATION", project.properties['display.orientation'] ?: "-1")
 
         // Substitution variables for the manifest
         manifestPlaceholders = [

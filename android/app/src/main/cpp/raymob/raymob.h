@@ -258,6 +258,36 @@ void SoftKeyboardEditText(char* text, unsigned int size);
  */
 void KeepScreenOn(bool keepOn);
 
+/* Safe area functions */
+
+/**
+ * @brief Get the safe area inset from the top (notch/cutout).
+ *
+ * @return Safe inset in pixels from the top edge.
+ */
+int GetSafeAreaTop(void);
+
+/**
+ * @brief Get the safe area inset from the bottom (notch/cutout).
+ *
+ * @return Safe inset in pixels from the bottom edge.
+ */
+int GetSafeAreaBottom(void);
+
+/**
+ * @brief Get the safe area inset from the left (notch/cutout).
+ *
+ * @return Safe inset in pixels from the left edge.
+ */
+int GetSafeAreaLeft(void);
+
+/**
+ * @brief Get the safe area inset from the right (notch/cutout).
+ *
+ * @return Safe inset in pixels from the right edge.
+ */
+int GetSafeAreaRight(void);
+
 /* Callback functions */
 
 /**

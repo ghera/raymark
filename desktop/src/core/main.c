@@ -26,6 +26,10 @@
 #include "background.h"
 #include "spike_field.h"
 
+#if defined(PLATFORM_ANDROID)
+#include "raymob.h"
+#endif
+
 #define FPS_STATS_WARMUP_SECONDS 3.0
 #define FPS_STATS_INITIAL_CAPACITY 1024
 #define FPS_STATS_MIN_SAMPLES 30
@@ -100,9 +104,9 @@ static void UpdateRenderInfo(RenderInfo* info) {
     info->loaded = true;
 }
 
-static void DrawRenderInfo(const RenderInfo* info, int x, int y) {
-    const int fontSize = 20;
-    const int lineHeight = 25;
+static void DrawRenderInfo(const RenderInfo* info, int x, int y, float textScale) {
+    const int fontSize = (int)(20.0f * textScale / 5.0f + 0.5f) * 5;
+    const int lineHeight = (int)(25.0f * textScale / 5.0f + 0.5f) * 5;
 
     if (!info->loaded) {
         DrawText("GPU: waiting...", x, y, fontSize, RAYWHITE);
@@ -202,8 +206,8 @@ static void UpdateFpsStats(FpsStats* stats, float frameTime) {
     }
 }
 
-static void DrawFpsStats(const FpsStats* stats, int x, int y) {
-    const int fontSize = 20;
+static void DrawFpsStats(const FpsStats* stats, int x, int y, float textScale) {
+    const int fontSize = (int)(20.0f * textScale / 5.0f + 0.5f) * 5;
     const FpsStatsResult result = stats->cached_result;
 
     if (!result.ready) {
@@ -239,6 +243,20 @@ int main(void) {
     Background* background = LoadBackground();
     SpikeField* field = LoadSpikeField();
 
+    int physW = GetScreenWidth();
+    int physH = GetScreenHeight();
+    int shortSide = physW < physH ? physW : physH;
+    float textScale = (float)shortSide / 720.0f;
+
+#if defined(PLATFORM_ANDROID)
+    float pxRatio = (float)GetRenderWidth() / (float)physW;
+    int safeX = GetSafeAreaLeft() > 0 ? (int)(GetSafeAreaLeft() * pxRatio + 20.0f) : 40;
+    int safeY = GetSafeAreaTop() > 0 ? (int)(GetSafeAreaTop() * pxRatio + 10.0f) : 40;
+#else
+    int safeX = 40;
+    int safeY = 40;
+#endif
+
     float time = 0.0f;
     float angle = 0.0f;
 
@@ -269,9 +287,9 @@ int main(void) {
         ClearBackground(BLACK);
         DrawBackground(background, GetRenderWidth(), GetRenderHeight());
         DrawSpikeField(field, cam);
-        DrawFpsStats(&fpsStats, 40, 40);
+        DrawFpsStats(&fpsStats, safeX, safeY, textScale);
         UpdateRenderInfo(&renderInfo);
-        DrawRenderInfo(&renderInfo, 40, 70);
+        DrawRenderInfo(&renderInfo, safeX, safeY + (int)(30.0f * textScale), textScale);
         EndDrawing();
     }
 
