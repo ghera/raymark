@@ -35,7 +35,7 @@ list(APPEND SOURCES ${ANDROID_NDK}/sources/android/native_app_glue/android_nativ
 add_library(${APP_LIB_NAME} SHARED ${SOURCES})
 
 # Define compiler macros for the library
-target_compile_definitions(${APP_LIB_NAME} PRIVATE PLATFORM_ANDROID)
+target_compile_definitions(${APP_LIB_NAME} PRIVATE PLATFORM_ANDROID PLATFORM_MOBILE)
 
 # Apply flags depending on the build type
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
