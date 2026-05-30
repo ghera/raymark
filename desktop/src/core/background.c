@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <raylib.h>
 
+#include "resource_path.h"
 #include "shader_utils.h"
 
 struct Background {
@@ -14,7 +15,9 @@ struct Background {
 Background* LoadBackground(void) {
     Background* background = MemAlloc(sizeof(Background));
 
-    background->shader = LoadShaderWithGlslVersion(NULL, "resources/shaders/background.fs");
+    char resPath[RESOURCE_PATH_MAX];
+    ResourcePath("resources/shaders/background.fs", resPath);
+    background->shader = LoadShaderWithGlslVersion(NULL, resPath);
     background->resolution_location = GetShaderLocation(background->shader, "resolution");
     background->time_location = GetShaderLocation(background->shader, "time");
 

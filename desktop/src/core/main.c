@@ -2,9 +2,14 @@
 #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/param.h>
+
+#if defined(PLATFORM_ANDROID) || defined(PLATFORM_IOS)
+#define PLATFORM_MOBILE
+#endif
 
 #if defined(PLATFORM_IOS)
-#include <libGLESv2/GLES3/gl3.h>
+#include <libGLESv2/GLES2/gl2.h>
 #elif defined(GRAPHICS_API_OPENGL_ES3)
 #include <GLES3/gl3.h>
 #elif defined(GRAPHICS_API_OPENGL_ES2)
@@ -21,13 +26,20 @@
 #include <GL/gl.h>
 #endif
 
+#include <sys/param.h>
+
 #include <rlgl.h>
 
 #include "background.h"
 #include "spike_field.h"
+#include "resource_path.h"
 
 #if defined(PLATFORM_ANDROID)
 #include "raymob.h"
+#endif
+
+#if defined(PLATFORM_IOS)
+#include "IOSBridge.h"
 #endif
 
 #define FPS_STATS_WARMUP_SECONDS 3.0
@@ -227,7 +239,17 @@ static void UnloadFpsStats(FpsStats* stats) {
     stats->sample_count = 0;
 }
 
-int main(void) {
+RenderInfo renderInfo = {0};
+FpsStats fpsStats = {0};
+Background* background;
+SpikeField* field;
+float rotationTime = 0.0f;
+float angle = 0.0f;
+int safeX = 20;
+int safeY = 20;
+float textScale = 1.0f;
+
+void ready() {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
 #if defined(PLATFORM_MOBILE)
     SetConfigFlags(FLAG_FULLSCREEN_MODE);
@@ -238,67 +260,91 @@ int main(void) {
 
     SetTargetFPS(0);
 
-    RenderInfo renderInfo = {0};
     UpdateRenderInfo(&renderInfo);
-    FpsStats fpsStats = {0};
 
-    Background* background = LoadBackground();
-    SpikeField* field = LoadSpikeField();
+    int shortScreen = MIN(GetScreenWidth(), GetScreenHeight());
+    textScale = (float)shortScreen / (float)REFERENCE_HEIGHT;
 
-    int physW = GetScreenWidth();
-    int physH = GetScreenHeight();
-    int shortSide = physW < physH ? physW : physH;
-    float textScale = (float)shortSide / 720.0f;
+    int shortRender = MIN(GetRenderWidth(), GetRenderHeight());
+    int gridSize = (int)(256.0f * shortRender / (float)REFERENCE_HEIGHT + 0.5f);
+    gridSize = (gridSize / 4) * 4;
+    gridSize = MAX(gridSize, 16);
 
-#if defined(PLATFORM_ANDROID)
-    float pxRatio = (float)GetRenderWidth() / (float)physW;
-    int safeX = GetSafeAreaLeft() > 0 ? (int)(GetSafeAreaLeft() * pxRatio + 20.0f) : 40;
-    int safeY = GetSafeAreaTop() > 0 ? (int)(GetSafeAreaTop() * pxRatio + 10.0f) : 40;
-#else
-    int safeX = 40;
-    int safeY = 40;
+    background = LoadBackground();
+    field = LoadSpikeField(gridSize);
+
+#if defined(PLATFORM_IOS)
+    SafeAreaInsets insets = GetIOSSafeAreaInsets();
+    safeX = insets.left + 10;
+    safeY = insets.top + 10;
+#elif defined(PLATFORM_ANDROID)
+    safeX = GetSafeAreaLeft() + 20;
+    safeY = GetSafeAreaTop() + 20;
 #endif
+}
 
-    float time = 0.0f;
-    float angle = 0.0f;
+void update(bool viewSizeChanged) {
+    float dt = GetFrameTime();
+    UpdateFpsStats(&fpsStats, dt);
+    rotationTime += dt;
+    angle += dt * 20.0f;
 
-    while (!WindowShouldClose()) {
-        float dt = GetFrameTime();
-        UpdateFpsStats(&fpsStats, dt);
-        time += dt;
-        angle += dt * 20.0f;
+    UpdateBackground(background, rotationTime, GetRenderWidth(), GetRenderHeight());
+    UpdateSpikeField(field, rotationTime);
 
-        UpdateBackground(background, time, GetRenderWidth(), GetRenderHeight());
-        UpdateSpikeField(field, time);
+    float radius = 2.8f;
+    float height = 1.8f;
+    Camera3D cam = {
+        .position = {
+            cosf(angle * DEG2RAD) * radius,
+            height,
+            sinf(angle * DEG2RAD) * radius,
+        },
+        .target = {0.0f, 0.0f, 0.0f},
+        .up = {0.0f, 1.0f, 0.0f},
+        .fovy = 45.0f,
+        .projection = CAMERA_PERSPECTIVE,
+    };
 
-        float radius = 2.8f;
-        float height = 1.8f;
-        Camera3D cam = {
-            .position = {
-                cosf(angle * DEG2RAD) * radius,
-                height,
-                sinf(angle * DEG2RAD) * radius,
-            },
-            .target = {0.0f, 0.0f, 0.0f},
-            .up = {0.0f, 1.0f, 0.0f},
-            .fovy = 45.0f,
-            .projection = CAMERA_PERSPECTIVE,
-        };
+    BeginDrawing();
+    ClearBackground(BLACK);
+    DrawBackground(background, GetRenderWidth(), GetRenderHeight());
+    DrawSpikeField(field, cam);
+    DrawFpsStats(&fpsStats, safeX, safeY, textScale);
+    UpdateRenderInfo(&renderInfo);
+    int lineH = (int)(25.0f * textScale / 5.0f + 0.5f) * 5;
+    DrawRenderInfo(&renderInfo, safeX, safeY + lineH * 3 + (int)(10.0f * textScale), textScale);
+    EndDrawing();
+}
 
-        BeginDrawing();
-        ClearBackground(BLACK);
-        DrawBackground(background, GetRenderWidth(), GetRenderHeight());
-        DrawSpikeField(field, cam);
-        DrawFpsStats(&fpsStats, safeX, safeY, textScale);
-        UpdateRenderInfo(&renderInfo);
-        int lineH = (int)(25.0f * textScale / 5.0f + 0.5f) * 5;
-        DrawRenderInfo(&renderInfo, safeX, safeY + lineH * 3 + (int)(10.0f * textScale), textScale);
-        EndDrawing();
-    }
-
+void destroy() {
     UnloadSpikeField(field);
     UnloadBackground(background);
     UnloadFpsStats(&fpsStats);
     CloseWindow();
+}
+
+#if defined(PLATFORM_IOS)
+void ios_ready() {
+    ready();
+}
+
+void ios_update(bool viewSizeChanged) {
+    update(viewSizeChanged);
+}
+
+void ios_destroy() {
+    destroy();
+}
+#else
+int main() {
+    ready();
+
+    while (!WindowShouldClose()) {
+        update(false);
+    }
+
+    destroy();
     return 0;
 }
+#endif
