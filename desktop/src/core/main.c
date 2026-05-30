@@ -115,10 +115,7 @@ static void UpdateRenderInfo(RenderInfo* info) {
     info->loaded = true;
 }
 
-static void DrawRenderInfo(const RenderInfo* info, int x, int y, float textScale) {
-    const int fontSize = (int)(20.0f * textScale / 5.0f + 0.5f) * 5;
-    const int lineHeight = (int)(25.0f * textScale / 5.0f + 0.5f) * 5;
-
+static void DrawRenderInfo(const RenderInfo* info, int x, int y, int fontSize, int lineHeight) {
     if (!info->loaded) {
         DrawText("GPU: waiting...", x, y, fontSize, RAYWHITE);
         return;
@@ -218,9 +215,7 @@ static void UpdateFpsStats(FpsStats* stats, float frameTime) {
     }
 }
 
-static void DrawFpsStats(const FpsStats* stats, int x, int y, float textScale) {
-    const int fontSize = (int)(20.0f * textScale / 5.0f + 0.5f) * 5;
-    const int lineHeight = (int)(25.0f * textScale / 5.0f + 0.5f) * 5;
+static void DrawFpsStats(const FpsStats* stats, int x, int y, int fontSize, int lineHeight) {
     const FpsStatsResult result = stats->cached_result;
 
     if (!result.ready) {
@@ -246,7 +241,8 @@ SpikeField* field;
 float rotationTime = 0.0f;
 float angle = 0.0f;
 int safeX = 20;
-int safeY = 20;
+int safeTopY = 20;
+int safeBottomY = 20;
 float textScale = 1.0f;
 
 void ready() {
@@ -276,14 +272,49 @@ void ready() {
 #if defined(PLATFORM_IOS)
     SafeAreaInsets insets = GetIOSSafeAreaInsets();
     safeX = insets.left + 10;
-    safeY = insets.top + 10;
+    safeTopY = insets.top + 10;
+    safeBottomY = insets.bottom + 10;
 #elif defined(PLATFORM_ANDROID)
     safeX = GetSafeAreaLeft() + 20;
-    safeY = GetSafeAreaTop() + 20;
+    safeTopY = GetSafeAreaTop() + 20;
+    safeBottomY = GetSafeAreaBottom() + 20;
 #endif
 }
 
+#if !defined(PLATFORM_MOBILE)
+static void ToggleFullscreenMode(void) {
+    UnloadSpikeField(field);
+    UnloadBackground(background);
+    UnloadFpsStats(&fpsStats);
+
+    ToggleFullscreen();
+
+    // Recalc everything like in ready()
+    int shortScreen = MIN(GetScreenWidth(), GetScreenHeight());
+    textScale = (float)shortScreen / (float)REFERENCE_HEIGHT;
+
+    int shortRender = MIN(GetRenderWidth(), GetRenderHeight());
+    int gridSize = (int)(256.0f * shortRender / (float)REFERENCE_HEIGHT + 0.5f);
+    gridSize = (gridSize / 4) * 4;
+    gridSize = MAX(gridSize, 16);
+
+    background = LoadBackground();
+    field = LoadSpikeField(gridSize);
+
+    rotationTime = 0.0f;
+    angle = 0.0f;
+    fpsStats = (FpsStats){0};
+    renderInfo.loaded = false;
+}
+#endif
+
 void update(bool viewSizeChanged) {
+#if !defined(PLATFORM_MOBILE)
+    if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))) {
+        ToggleFullscreenMode();
+    }
+#endif
+
     float dt = GetFrameTime();
     UpdateFpsStats(&fpsStats, dt);
     rotationTime += dt;
@@ -310,12 +341,12 @@ void update(bool viewSizeChanged) {
     ClearBackground(BLACK);
     DrawBackground(background, GetScreenWidth(), GetScreenHeight());
     DrawSpikeField(field, cam);
-    DrawFpsStats(&fpsStats, safeX, safeY, textScale);
-    int lineH = (int)(25.0f * textScale / 5.0f + 0.5f) * 5;
-    int fontSize = (int)(20.0f * textScale / 5.0f + 0.5f) * 5;
-    DrawText(TextFormat("Resolution: %d x %d", GetRenderWidth(), GetRenderHeight()), safeX, safeY + lineH * 3, fontSize, SKYBLUE);
+    int fontSize = (int)(20.0f * textScale / 10.0f + 0.5f) * 10;
+    int lineHeight = (int)((float)fontSize * 1.2f);
+    DrawFpsStats(&fpsStats, safeX, safeTopY, fontSize, lineHeight);
+    DrawText(TextFormat("Resolution: %d x %d", GetRenderWidth(), GetRenderHeight()), safeX, safeTopY + lineHeight * 3, fontSize, SKYBLUE);
     UpdateRenderInfo(&renderInfo);
-    DrawRenderInfo(&renderInfo, safeX, GetScreenHeight() - safeY - lineH * 3, textScale);
+    DrawRenderInfo(&renderInfo, safeX, GetScreenHeight() - safeBottomY - lineHeight * 3, fontSize, lineHeight);
     EndDrawing();
 }
 

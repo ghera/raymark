@@ -12,13 +12,14 @@ Based on **[pi-field](https://github.com/letsreinventthewheel/pi-field)** by [le
 
 | Device | GPU | Screen |
 |--------|-----|--------|
-| ![Mac mini M4](results/Mac%20mini%20M4.png) | M4 (10-core GPU) | 1280×720 |
-| ![iPhone 15](results/iPhone15.png) | A16 Bionic | 2556×1179 |
-| ![Samsung A56](results/Samsung%20A56.png) | Exynos 1480 | 2340×1080 |
+| ![Mac mini M4](results/Mac%20mini%20M4.png) | M4 (10-core GPU) | 1920×1200 |
+| ![iPad Air 5th](results/iPad%20Air%205th%20M1.png) | M1 (8-core GPU) | 2360×1640 |
+| ![iPhone 15](results/iPhone%2015.png) | A16 Bionic | 2556×1179 |
+| ![Samsung A56](results/Samsung%20Galaxy%20A56.png) | Exynos 1480 | 2340×1080 |
 
 ## Resolution
 
-- **Desktop**: windowed at 720p (1280×720)
+- **Desktop**: windowed at 720p (1280×720), fullscreen (Alt + Enter) at monitor resolution
 - **Mobile** (Android/iOS): fullscreen at native device resolution
 
 The spike grid is 256×256 at the 720p reference height. It scales automatically with resolution so the visual density stays consistent across devices.
