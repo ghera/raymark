@@ -292,8 +292,8 @@ void update(bool viewSizeChanged) {
     UpdateBackground(background, rotationTime, GetRenderWidth(), GetRenderHeight());
     UpdateSpikeField(field, rotationTime);
 
-    float radius = 2.8f;
-    float height = 1.8f;
+    float radius = 1.5f;
+    float height = 2.2f;
     Camera3D cam = {
         .position = {
             cosf(angle * DEG2RAD) * radius,
@@ -311,9 +311,11 @@ void update(bool viewSizeChanged) {
     DrawBackground(background, GetRenderWidth(), GetRenderHeight());
     DrawSpikeField(field, cam);
     DrawFpsStats(&fpsStats, safeX, safeY, textScale);
-    UpdateRenderInfo(&renderInfo);
     int lineH = (int)(25.0f * textScale / 5.0f + 0.5f) * 5;
-    DrawRenderInfo(&renderInfo, safeX, safeY + lineH * 3 + (int)(10.0f * textScale), textScale);
+    int fontSize = (int)(20.0f * textScale / 5.0f + 0.5f) * 5;
+    DrawText(TextFormat("Resolution: %d x %d", GetRenderWidth(), GetRenderHeight()), safeX, safeY + lineH * 3, fontSize, SKYBLUE);
+    UpdateRenderInfo(&renderInfo);
+    DrawRenderInfo(&renderInfo, safeX, GetRenderHeight() - safeY - lineH * 3, textScale);
     EndDrawing();
 }
 
