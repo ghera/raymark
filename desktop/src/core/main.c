@@ -308,14 +308,14 @@ void update(bool viewSizeChanged) {
 
     BeginDrawing();
     ClearBackground(BLACK);
-    DrawBackground(background, GetRenderWidth(), GetRenderHeight());
+    DrawBackground(background, GetScreenWidth(), GetScreenHeight());
     DrawSpikeField(field, cam);
     DrawFpsStats(&fpsStats, safeX, safeY, textScale);
     int lineH = (int)(25.0f * textScale / 5.0f + 0.5f) * 5;
     int fontSize = (int)(20.0f * textScale / 5.0f + 0.5f) * 5;
     DrawText(TextFormat("Resolution: %d x %d", GetRenderWidth(), GetRenderHeight()), safeX, safeY + lineH * 3, fontSize, SKYBLUE);
     UpdateRenderInfo(&renderInfo);
-    DrawRenderInfo(&renderInfo, safeX, GetRenderHeight() - safeY - lineH * 3, textScale);
+    DrawRenderInfo(&renderInfo, safeX, GetScreenHeight() - safeY - lineH * 3, textScale);
     EndDrawing();
 }
 
