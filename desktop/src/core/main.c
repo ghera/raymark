@@ -193,6 +193,23 @@ static FpsStatsResult CalculateFpsStatsResult(FpsStats* stats) {
     return result;
 }
 
+#define OUTLIER_MEDIAN_WINDOW 16
+#define OUTLIER_THRESHOLD 5.0f
+
+// Quick median from a small array of recent frame times.
+// Returns 0 if no samples available.
+static float RecentMedian(const float* frameTimes, unsigned int count, unsigned int writeIdx) {
+    if (count == 0) return 0.0f;
+    unsigned int n = (count < OUTLIER_MEDIAN_WINDOW) ? count : OUTLIER_MEDIAN_WINDOW;
+    float buf[OUTLIER_MEDIAN_WINDOW];
+    unsigned int start = (writeIdx + FPS_STATS_WINDOW_SIZE - n) % FPS_STATS_WINDOW_SIZE;
+    for (unsigned int i = 0; i < n; i++) {
+        buf[i] = frameTimes[(start + i) % FPS_STATS_WINDOW_SIZE];
+    }
+    qsort(buf, n, sizeof(buf[0]), CompareFrameTimes);
+    return buf[n / 2];
+}
+
 static void UpdateFpsStats(FpsStats* stats, float frameTime) {
     if (frameTime <= 0.0f) {
         return;
@@ -202,6 +219,21 @@ static void UpdateFpsStats(FpsStats* stats, float frameTime) {
 
     if (stats->elapsed_time < FPS_STATS_WARMUP_SECONDS) {
         return;
+    }
+
+    // Outlier detection: if frame time >> recent median, discard it.
+    // This prevents screenshot stalls or OS hiccups from corrupting stats.
+    if (stats->sample_count >= OUTLIER_MEDIAN_WINDOW) {
+        float median = RecentMedian(stats->frame_times, stats->sample_count, stats->write_idx);
+        if (median > 0.0f && frameTime > median * OUTLIER_THRESHOLD) {
+            // Outlier: skip recording, but still count elapsed time for refresh.
+            stats->refresh_time += frameTime;
+            if (!stats->cached_result.ready || stats->refresh_time >= FPS_STATS_UPDATE_INTERVAL) {
+                stats->cached_result = CalculateFpsStatsResult(stats);
+                stats->refresh_time = 0.0;
+            }
+            return;
+        }
     }
 
     stats->frame_times[stats->write_idx] = frameTime;
