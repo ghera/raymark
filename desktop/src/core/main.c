@@ -2,7 +2,13 @@
 #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/param.h>
+
+#if !defined(MIN)
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
+#if !defined(MAX)
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#endif
 
 #if defined(PLATFORM_ANDROID) || defined(PLATFORM_IOS)
 #define PLATFORM_MOBILE
@@ -26,13 +32,11 @@
 #include <GL/gl.h>
 #endif
 
-#include <sys/param.h>
-
 #include <rlgl.h>
 
 #include "background.h"
-#include "spike_field.h"
 #include "resource_path.h"
+#include "spike_field.h"
 
 #if defined(PLATFORM_ANDROID)
 #include "raymob.h"
