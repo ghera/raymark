@@ -99,6 +99,6 @@ This project is a direct copy, with some additions, of **[pi-field](https://gith
 
 ## License
 
-MIT © 2025 ghera (https://github.com/ghera/raymark)
+0BSD (Zero-Clause BSD).
 
 See [LICENSE](./LICENSE).
