@@ -10,13 +10,13 @@ Based on **[pi-field](https://github.com/letsreinventthewheel/pi-field)** by [le
 
 ## Benchmark Results
 
-| Device | GPU | Screen |
-|--------|-----|--------|
-| <a href="results/Mac%20mini%20M4.png"><img src="results/Mac%20mini%20M4.png" alt="Mac mini M4" width="240"></a> | M4 (10-core GPU) | 1920×1200 |
-| <a href="results/AMD%20Ryzen%207800X3D%20%2B%20NVIDIA%20GeForce%20RTX%204070%20Super.png"><img src="results/AMD%20Ryzen%207800X3D%20%2B%20NVIDIA%20GeForce%20RTX%204070%20Super.png" alt="AMD Ryzen 7800X3D + NVIDIA GeForce RTX 4070 Super" width="240"></a> | NVIDIA GeForce RTX 4070 SUPER | 1920×1080 |
-| <a href="results/iPad%20Air%205th%20M1.png"><img src="results/iPad%20Air%205th%20M1.png" alt="iPad Air 5th M1" width="240"></a> | M1 (8-core GPU) | 2360×1640 |
-| <a href="results/iPhone%2015.png"><img src="results/iPhone%2015.png" alt="iPhone 15" width="240"></a> | A16 Bionic | 2556×1179 |
-| <a href="results/Samsung%20Galaxy%20A56.png"><img src="results/Samsung%20Galaxy%20A56.png" alt="Samsung Galaxy A56" width="240"></a> | Exynos 1480 | 2340×1080 |
+| Device | GPU | Screen | Result |
+|--------|-----|--------|--------|
+| Mac mini M4 | M4 (10-core GPU) | 1920×1200 | <a href="results/Mac%20mini%20M4.png"><img src="results/Mac%20mini%20M4.png" alt="Mac mini M4 result" width="240"></a> |
+| AMD Ryzen 7800X3D + NVIDIA GeForce RTX 4070 Super | NVIDIA GeForce RTX 4070 SUPER | 1920×1080 | <a href="results/AMD%20Ryzen%207800X3D%20%2B%20NVIDIA%20GeForce%20RTX%204070%20Super.png"><img src="results/AMD%20Ryzen%207800X3D%20%2B%20NVIDIA%20GeForce%20RTX%204070%20Super.png" alt="AMD Ryzen 7800X3D + NVIDIA GeForce RTX 4070 Super result" width="240"></a> |
+| iPad Air 5th M1 | M1 (8-core GPU) | 2360×1640 | <a href="results/iPad%20Air%205th%20M1.png"><img src="results/iPad%20Air%205th%20M1.png" alt="iPad Air 5th M1 result" width="240"></a> |
+| iPhone 15 | A16 Bionic | 2556×1179 | <a href="results/iPhone%2015.png"><img src="results/iPhone%2015.png" alt="iPhone 15 result" width="240"></a> |
+| Samsung Galaxy A56 | Exynos 1480 | 2340×1080 | <a href="results/Samsung%20Galaxy%20A56.png"><img src="results/Samsung%20Galaxy%20A56.png" alt="Samsung Galaxy A56 result" width="240"></a> |
 
 ## Resolution
 
