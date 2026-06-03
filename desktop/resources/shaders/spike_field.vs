@@ -1,16 +1,26 @@
 #version $GLSL_VERSION
 
-in vec3 vertexPosition;
-in mat4 instanceTransform;
+#ifdef GL_ES
+precision mediump float;
+precision mediump int;
+#define HIGH_PRECISION highp
+#define MEDIUM_PRECISION mediump
+#else
+#define HIGH_PRECISION
+#define MEDIUM_PRECISION
+#endif
 
-uniform float time;
+in MEDIUM_PRECISION vec3 vertexPosition;
+in MEDIUM_PRECISION mat4 instanceTransform;
+
+uniform HIGH_PRECISION float time;
 uniform int gridSize;
 uniform sampler2D texture0;
-uniform mat4 mvp;
+uniform HIGH_PRECISION mat4 mvp;
 
-out float spikeHeight;
+out MEDIUM_PRECISION float spikeHeight;
 
-const float TAU = 6.283185;
+const MEDIUM_PRECISION float TAU = 6.283185;
 
 uint hash(uint a) {
     a -= (a << 6);
