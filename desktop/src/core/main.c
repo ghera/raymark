@@ -282,7 +282,6 @@ int safeBottomY = 20;
 float textScale = 1.0f;
 
 void ready() {
-    SetConfigFlags(FLAG_MSAA_4X_HINT);
 #if defined(PLATFORM_MOBILE)
     SetConfigFlags(FLAG_FULLSCREEN_MODE);
     InitWindow(0, 0, "Raymark");
